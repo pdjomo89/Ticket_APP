@@ -1,6 +1,21 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+export const clearAll = mutation({
+  handler: async (ctx) => {
+    const tickets = await ctx.db.query("tickets").collect();
+    for (const ticket of tickets) {
+      await ctx.db.delete(ticket._id);
+    }
+    // Reset ticketsSold on all events
+    const events = await ctx.db.query("events").collect();
+    for (const event of events) {
+      await ctx.db.patch(event._id, { ticketsSold: 0 });
+    }
+    return `Deleted ${tickets.length} tickets`;
+  },
+});
+
 export const createTicket = mutation({
   args: {
     ticketId: v.string(),
