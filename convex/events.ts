@@ -1,0 +1,114 @@
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+export const list = query({
+  handler: async (ctx) => {
+    const events = await ctx.db.query("events").collect();
+    events.sort((a, b) => a.date.localeCompare(b.date));
+    return events;
+  },
+});
+
+export const getByEventId = query({
+  args: { eventId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("events")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .first();
+  },
+});
+
+export const seed = mutation({
+  handler: async (ctx) => {
+    const existing = await ctx.db.query("events").first();
+    if (existing) return "Events already seeded";
+
+    await ctx.db.insert("events", {
+      eventId: "evt_004",
+      name: "Grand Barbecue de Québec 2026",
+      description:
+        "Venez profiter d'une journée festive autour du barbecue à Québec! Grillades, musique, activités pour toute la famille et une ambiance chaleureuse vous attendent.",
+      date: "2026-07-11T10:00:00",
+      time: "9:00 AM – 3:00 PM",
+      venue: "160, rue Cardinal-Maurice-Roy, G1K 2K5, Québec",
+      ticketsAvailable: 300,
+      ticketsSold: 0,
+      imageUrl: "/images/barbecue-quebec-2026.png",
+      tiers: [
+        {
+          id: "standard",
+          name: "Standard",
+          price: 3000,
+        },
+      ],
+    });
+
+    await ctx.db.insert("events", {
+      eventId: "evt_005",
+      name: "Nighty Gala Party",
+      description:
+        "An elegant evening of fine dining, live music, and dancing. Dress to impress for an unforgettable night of glamour and celebration.",
+      date: "2026-07-11T19:00:00",
+      time: "7:00 PM – 1:00 AM",
+      venue: "TBA",
+      ticketsAvailable: 200,
+      ticketsSold: 0,
+      imageUrl: "/images/nighty-gala-2026.png",
+      tiers: [
+        {
+          id: "single",
+          name: "Single",
+          price: 5000,
+          description: "One entry pass",
+        },
+        {
+          id: "couple-vip",
+          name: "Couple VIP",
+          price: 9000,
+          description: "Two entry passes with VIP access",
+        },
+      ],
+    });
+
+    return "Seeded successfully";
+  },
+});
+
+export const updateEvent = mutation({
+  args: {
+    eventId: v.string(),
+    time: v.optional(v.string()),
+    venue: v.optional(v.string()),
+    date: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .first();
+    if (!event) throw new Error("Event not found");
+
+    const updates: Record<string, string> = {};
+    if (args.time !== undefined) updates.time = args.time;
+    if (args.venue !== undefined) updates.venue = args.venue;
+    if (args.date !== undefined) updates.date = args.date;
+
+    await ctx.db.patch(event._id, updates);
+  },
+});
+
+export const incrementTicketsSold = mutation({
+  args: { eventId: v.string(), quantity: v.number() },
+  handler: async (ctx, args) => {
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .first();
+    if (!event) throw new Error("Event not found");
+
+    await ctx.db.patch(event._id, {
+      ticketsSold: event.ticketsSold + args.quantity,
+    });
+  },
+});
