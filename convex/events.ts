@@ -81,6 +81,7 @@ export const updateEvent = mutation({
     time: v.optional(v.string()),
     venue: v.optional(v.string()),
     date: v.optional(v.string()),
+    ticketsAvailable: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const event = await ctx.db
@@ -89,10 +90,11 @@ export const updateEvent = mutation({
       .first();
     if (!event) throw new Error("Event not found");
 
-    const updates: Record<string, string> = {};
+    const updates: Record<string, string | number> = {};
     if (args.time !== undefined) updates.time = args.time;
     if (args.venue !== undefined) updates.venue = args.venue;
     if (args.date !== undefined) updates.date = args.date;
+    if (args.ticketsAvailable !== undefined) updates.ticketsAvailable = args.ticketsAvailable;
 
     await ctx.db.patch(event._id, updates);
   },
