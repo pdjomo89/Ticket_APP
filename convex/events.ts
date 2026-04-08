@@ -31,7 +31,7 @@ export const seed = mutation({
         "Venez profiter d'une journée festive autour du barbecue à Québec! Grillades, musique, activités pour toute la famille et une ambiance chaleureuse vous attendent.",
       date: "2026-07-11T10:00:00",
       time: "9:00 AM – 3:00 PM",
-      venue: "160, rue Cardinal-Maurice-Roy, G1K 2K5, Québec",
+      venue: "Parc Victoria — 160 Rue du Cardinal-Maurice-Roy, Québec, QC G1K 8W5",
       ticketsAvailable: 300,
       ticketsSold: 0,
       imageUrl: "/images/barbecue-quebec-2026.png",

@@ -92,12 +92,6 @@ export default function Home() {
               <span className="relative z-10">Browse Events</span>
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </Link>
-            <Link
-              href="/scanner"
-              className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-bold text-lg hover:bg-white/20 transition-all duration-300"
-            >
-              Scan Tickets
-            </Link>
           </div>
 
           {/* Features */}
