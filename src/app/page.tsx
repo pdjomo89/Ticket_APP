@@ -4,12 +4,19 @@ export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Background image grid with blend */}
-      <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 opacity-40">
+      <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 opacity-40">
         <div
           className="bg-cover bg-center"
           style={{
             backgroundImage:
               "url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800')",
+          }}
+        />
+        <div
+          className="bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800')",
           }}
         />
         <div
@@ -23,6 +30,13 @@ export default function Home() {
           className="bg-cover bg-center"
           style={{
             backgroundImage:
+              "url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800')",
+          }}
+        />
+        <div
+          className="bg-cover bg-center"
+          style={{
+            backgroundImage:
               "url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800')",
           }}
         />
@@ -30,7 +44,7 @@ export default function Home() {
           className="bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800')",
+              "url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800')",
           }}
         />
         <div
@@ -44,7 +58,7 @@ export default function Home() {
           className="bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800')",
+              "url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800')",
           }}
         />
       </div>
