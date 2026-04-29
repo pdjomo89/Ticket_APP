@@ -34,7 +34,7 @@ export const seed = mutation({
       venue: "Parc Victoria — 160 Rue du Cardinal-Maurice-Roy, Québec, QC G1K 8W5",
       ticketsAvailable: 300,
       ticketsSold: 0,
-      imageUrl: "/images/barbecue-quebec-2026.png",
+      imageUrl: "/images/bbq-ambiance-acte-2-2026.jpeg",
       tiers: [
         {
           id: "standard",
@@ -82,6 +82,7 @@ export const updateEvent = mutation({
     venue: v.optional(v.string()),
     date: v.optional(v.string()),
     ticketsAvailable: v.optional(v.number()),
+    imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const event = await ctx.db
@@ -95,8 +96,77 @@ export const updateEvent = mutation({
     if (args.venue !== undefined) updates.venue = args.venue;
     if (args.date !== undefined) updates.date = args.date;
     if (args.ticketsAvailable !== undefined) updates.ticketsAvailable = args.ticketsAvailable;
+    if (args.imageUrl !== undefined) updates.imageUrl = args.imageUrl;
 
     await ctx.db.patch(event._id, updates);
+  },
+});
+
+export const create = mutation({
+  args: {
+    eventId: v.string(),
+    name: v.string(),
+    description: v.string(),
+    date: v.string(),
+    time: v.optional(v.string()),
+    venue: v.string(),
+    ticketsAvailable: v.number(),
+    imageUrl: v.optional(v.string()),
+    tiers: v.array(
+      v.object({
+        id: v.string(),
+        name: v.string(),
+        price: v.number(),
+        description: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("events")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .first();
+    if (existing) throw new Error("An event with this ID already exists");
+    await ctx.db.insert("events", {
+      eventId: args.eventId,
+      name: args.name,
+      description: args.description,
+      date: args.date,
+      time: args.time,
+      venue: args.venue,
+      ticketsAvailable: args.ticketsAvailable,
+      ticketsSold: 0,
+      imageUrl: args.imageUrl,
+      tiers: args.tiers,
+    });
+  },
+});
+
+export const resetEventCounters = mutation({
+  args: { eventId: v.string() },
+  handler: async (ctx, args) => {
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .first();
+    if (!event) throw new Error("Event not found");
+
+    await ctx.db.patch(event._id, { ticketsSold: 0 });
+
+    const tickets = await ctx.db
+      .query("tickets")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .collect();
+
+    let resetCount = 0;
+    for (const t of tickets) {
+      if (t.status === "used" || t.scannedAt !== undefined) {
+        await ctx.db.patch(t._id, { status: "valid", scannedAt: undefined });
+        resetCount++;
+      }
+    }
+
+    return { ticketsSoldReset: true, scannedTicketsReset: resetCount };
   },
 });
 

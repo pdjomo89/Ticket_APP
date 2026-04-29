@@ -65,7 +65,7 @@ export const getByTicketId = query({
 });
 
 export const validate = mutation({
-  args: { ticketId: v.string() },
+  args: { ticketId: v.string(), eventId: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const ticket = await ctx.db
       .query("tickets")
@@ -74,6 +74,14 @@ export const validate = mutation({
 
     if (!ticket) {
       return { valid: false, message: "Ticket not found", ticket: null };
+    }
+
+    if (args.eventId && ticket.eventId !== args.eventId) {
+      return {
+        valid: false,
+        message: "Ticket is for a different event",
+        ticket: null,
+      };
     }
 
     const event = await ctx.db
@@ -135,6 +143,7 @@ export const listAll = query({
   args: {
     search: v.optional(v.string()),
     status: v.optional(v.string()),
+    eventIds: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     let tickets;
@@ -146,6 +155,11 @@ export const listAll = query({
         .collect();
     } else {
       tickets = await ctx.db.query("tickets").collect();
+    }
+
+    if (args.eventIds) {
+      const allowed = new Set(args.eventIds);
+      tickets = tickets.filter((t) => allowed.has(t.eventId));
     }
 
     const events = await ctx.db.query("events").collect();
@@ -180,9 +194,18 @@ export const listAll = query({
 });
 
 export const stats = query({
-  handler: async (ctx) => {
-    const tickets = await ctx.db.query("tickets").collect();
-    const events = await ctx.db.query("events").collect();
+  args: {
+    eventIds: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    let tickets = await ctx.db.query("tickets").collect();
+    let events = await ctx.db.query("events").collect();
+
+    if (args.eventIds) {
+      const allowed = new Set(args.eventIds);
+      tickets = tickets.filter((t) => allowed.has(t.eventId));
+      events = events.filter((e) => allowed.has(e.eventId));
+    }
 
     return {
       events: events.map((e) => ({

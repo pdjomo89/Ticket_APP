@@ -1,15 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
+import { NextResponse } from "next/server";
 import { api } from "@convex/_generated/api";
+import { convex, getSession, permittedEventIds } from "@/lib/session";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-export async function GET(req: NextRequest) {
-  const token = req.cookies.get("admin_token");
-  if (!token) {
+export async function GET() {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const stats = await convex.query(api.tickets.stats);
+  const allowed = await permittedEventIds(session);
+  const stats = await convex().query(api.tickets.stats, {
+    eventIds: allowed === "all" ? undefined : allowed,
+  });
   return NextResponse.json(stats);
 }

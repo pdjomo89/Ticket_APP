@@ -38,4 +38,19 @@ export default defineSchema({
     .index("by_stripePaymentId", ["stripePaymentId"])
     .index("by_status", ["status"])
     .index("by_eventId", ["eventId"]),
+
+  users: defineTable({
+    email: v.string(),
+    passwordHash: v.string(),
+    name: v.string(),
+    role: v.string(), // "super" | "admin"
+  }).index("by_email", ["email"]),
+
+  eventAdmins: defineTable({
+    userId: v.id("users"),
+    eventId: v.string(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_eventId", ["eventId"])
+    .index("by_userId_eventId", ["userId", "eventId"]),
 });

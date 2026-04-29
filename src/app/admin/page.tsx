@@ -4,28 +4,44 @@ import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 
+type Me = { email: string; name: string; role: "super" | "admin"; eventIds: string[] };
+
 export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [me, setMe] = useState<Me | null>(null);
+  const [checked, setChecked] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  const authenticated = !!me;
+  const eventFilter = me?.role === "super" ? undefined : me?.eventIds;
+
   // Real-time Convex queries — only run when authenticated
-  const stats = useQuery(api.tickets.stats, authenticated ? {} : "skip");
+  const stats = useQuery(
+    api.tickets.stats,
+    authenticated ? { eventIds: eventFilter } : "skip"
+  );
   const tickets = useQuery(
     api.tickets.listAll,
     authenticated
-      ? { search: search || undefined, status: statusFilter || undefined }
+      ? {
+          search: search || undefined,
+          status: statusFilter || undefined,
+          eventIds: eventFilter,
+        }
       : "skip"
   );
 
   // Check if already authenticated
   useEffect(() => {
-    fetch("/api/admin/stats").then((res) => {
-      if (res.ok) setAuthenticated(true);
-    });
+    fetch("/api/admin/me")
+      .then(async (res) => {
+        if (res.ok) setMe(await res.json());
+      })
+      .finally(() => setChecked(true));
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,16 +52,26 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (res.ok) {
-      setAuthenticated(true);
+      const meRes = await fetch("/api/admin/me");
+      if (meRes.ok) setMe(await meRes.json());
     } else {
-      setLoginError("Invalid password");
+      setLoginError("Invalid email or password");
     }
     setLoading(false);
   };
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    setMe(null);
+    setEmail("");
+    setPassword("");
+  };
+
+  if (!checked) return null;
 
   if (!authenticated) {
     return (
@@ -54,15 +80,24 @@ export default function AdminPage() {
           <div className="text-center mb-6">
             <div className="text-4xl mb-3">🔒</div>
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p className="text-gray-500 text-sm mt-1">Enter password to continue</p>
+            <p className="text-gray-500 text-sm mt-1">Sign in to continue</p>
           </div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-orange-500 mb-3"
+            autoFocus
+            autoComplete="email"
+          />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4"
-            autoFocus
+            autoComplete="current-password"
           />
           {loginError && <p className="text-red-500 text-sm mb-4">{loginError}</p>}
           <button
@@ -70,7 +105,7 @@ export default function AdminPage() {
             disabled={loading}
             className="w-full py-3 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-400 transition disabled:opacity-50"
           >
-            {loading ? "Logging in..." : "Log In"}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
       </div>
@@ -81,13 +116,30 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            {me?.role === "super" && (
+              <nav className="hidden sm:flex items-center gap-3 text-sm">
+                <a href="/admin/users" className="text-orange-600 hover:underline">Users</a>
+                <a href="/admin/events" className="text-orange-600 hover:underline">Events</a>
+              </nav>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-green-500 flex items-center gap-1">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               Live
             </span>
+            <span className="text-sm text-gray-500">
+              {me?.email} <span className="text-xs text-gray-400">({me?.role})</span>
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              Sign out
+            </button>
             <a href="/" className="text-sm text-gray-500 hover:text-gray-700">← Back to site</a>
           </div>
         </div>
