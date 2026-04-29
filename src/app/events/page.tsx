@@ -9,21 +9,40 @@ export default function EventsPage() {
 
   if (!events) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Upcoming Events</h1>
-        <Link href="/" className="text-blue-600 hover:underline">
-          Home
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="relative min-h-screen overflow-hidden bg-black">
+      <div className="absolute inset-0 bg-gradient-to-b from-orange-950/30 via-black to-purple-950/30" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-pink-900/20 via-transparent to-orange-900/20" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/15 rounded-full blur-[140px] animate-pulse" />
+      <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-purple-500/15 rounded-full blur-[140px] animate-pulse delay-1000" />
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl font-extrabold text-white drop-shadow-lg">
+            Upcoming Events
+          </h1>
+          <Link
+            href="/"
+            className="text-sm px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-gray-200 hover:bg-white/20 hover:text-white transition"
+          >
+            Home
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {events.map((event) => {
           const soldOut = event.ticketsSold >= event.ticketsAvailable;
 
@@ -108,6 +127,7 @@ export default function EventsPage() {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

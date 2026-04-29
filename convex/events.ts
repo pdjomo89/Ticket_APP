@@ -30,7 +30,7 @@ export const seed = mutation({
       description:
         "Venez profiter d'une journée festive autour du barbecue à Québec! Grillades, musique, activités pour toute la famille et une ambiance chaleureuse vous attendent.",
       date: "2026-07-11T10:00:00",
-      time: "9:00 AM – 3:00 PM",
+      time: "12h - 18h30",
       venue: "Parc Victoria — 160 Rue du Cardinal-Maurice-Roy, Québec, QC G1K 8W5",
       ticketsAvailable: 300,
       ticketsSold: 0,
@@ -50,8 +50,8 @@ export const seed = mutation({
       description:
         "An elegant evening of fine dining, live music, and dancing. Dress to impress for an unforgettable night of glamour and celebration.",
       date: "2026-07-11T19:00:00",
-      time: "7:00 PM – 1:00 AM",
-      venue: "TBA",
+      time: "19h - 2h",
+      venue: "Parc Victoria — 160 Rue du Cardinal-Maurice-Roy, Québec, QC G1K 8W5",
       ticketsAvailable: 200,
       ticketsSold: 0,
       imageUrl: "/images/nighty-gala-2026.png",
