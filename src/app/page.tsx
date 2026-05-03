@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -70,6 +71,22 @@ export default function Home() {
       {/* Animated glow orbs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/20 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+
+      {/* Top-left logo */}
+      <Link
+        href="/"
+        aria-label="TicketFlow home"
+        className="absolute top-4 left-4 md:top-6 md:left-6 z-20"
+      >
+        <Image
+          src="/logo.png"
+          alt="TicketFlow"
+          width={512}
+          height={512}
+          priority
+          className="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_30px_rgba(249,115,22,0.35)]"
+        />
+      </Link>
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
